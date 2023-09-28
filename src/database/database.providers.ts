@@ -26,8 +26,4 @@ export const databaseProviders = [
 			return sequelize;
 		},
 	},
-	// {
-	//   provide:'REDIS',
-	// },
-	// put redis database here
 ];
