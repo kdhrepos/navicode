@@ -12,9 +12,17 @@ export class CompanyService {
     private companyModel: typeof Company,
   ) {}
 
-  create(companyRegister: CompanySignUpDto) {}
+  async create(registerDto: CompanySignUpDto) {
+    await this.companyModel.create({
+      companyId: registerDto.companyId,
+      companyPassword: registerDto.companyPassword,
+      companyName: registerDto.companyName,
+      restaurantName: registerDto.restaurantName,
+      restaurantCost: registerDto.restaurantCost,
+    });
+  }
 
-  findOne(companyLogin: CompanyLoginDto) {}
+  findOne(companyLoginDto: CompanyLoginDto) {}
 
-  findAll(companySearch: CompanySearchDto) {}
+  findAll(companySearchDto: CompanySearchDto) {}
 }

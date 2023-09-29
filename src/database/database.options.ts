@@ -1,4 +1,6 @@
-export const databaseOptions = {
+import { SequelizeModuleOptions } from '@nestjs/sequelize';
+
+export const sequelizeOptions: SequelizeModuleOptions = {
   dialect: 'mysql',
   host: 'localhost',
   port: 3306,

@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
+import { BeforeCreate } from 'sequelize-typescript';
 
 export class CompanySignUpDto {
+  // @IsString()
+
+  // @BeforeCreate({})
+  //   generateUuid() {
+  //   }
   @IsString()
   @ApiProperty({
     example: 'asd123',
@@ -40,5 +46,5 @@ export class CompanySignUpDto {
     description: 'Cost that employee can use per one meal',
     required: true,
   })
-  restaurantCost: string;
+  restaurantCost: number;
 }

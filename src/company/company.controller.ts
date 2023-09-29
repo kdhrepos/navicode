@@ -1,4 +1,11 @@
-import { Controller, Post, Get, Query, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Query,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { CompanySignUpDto } from './dto/sign-up.dto';
@@ -13,7 +20,9 @@ export class CompanyController {
 
   @ApiOperation({ description: 'Sign up for company' })
   @Post('sign-up')
-  async signUp(@Query() companyRegisterDto: CompanySignUpDto) {}
+  async signUp(@Query() companyRegisterDto: CompanySignUpDto) {
+    return this.companyService.create(companyRegisterDto);
+  }
 
   @Post('login')
   async login(@Query() companyLoginDto: CompanyLoginDto) {}
