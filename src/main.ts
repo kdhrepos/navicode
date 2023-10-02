@@ -22,7 +22,8 @@ async function bootstrap() {
     }),
   );
 
-  // Logger Service
+  // CORS
+  app.enableCors();
 
   await app.listen(8000);
 }

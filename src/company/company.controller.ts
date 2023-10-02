@@ -6,6 +6,8 @@ import {
   Body,
   Req,
   Request,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
@@ -20,14 +22,15 @@ import { Response } from 'express';
 export class CompanyController {
   constructor(private companyService: CompanyService) {}
 
+  @HttpCode(200)
   @ApiOperation({ description: 'Sign up for company' })
   @Post('sign-up')
-  async signUp(@Query() companyRegisterDto: CompanySignUpDto) {
+  async signUp(@Body() companyRegisterDto: CompanySignUpDto) {
     return await this.companyService.create(companyRegisterDto);
   }
 
   @Post('login')
-  async login(@Query() companyLoginDto: CompanyLoginDto) {
+  async login(@Body() companyLoginDto: CompanyLoginDto) {
     return await this.companyService.findOne(companyLoginDto);
   }
 

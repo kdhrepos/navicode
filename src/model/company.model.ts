@@ -12,7 +12,7 @@ export class Company extends Model {
   @Column({ primaryKey: true })
   id: UUID;
 
-  @Column
+  @Column 
   restaurant_id: UUID;
 
   @Column({ unique: true })

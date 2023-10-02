@@ -38,6 +38,8 @@ export class CompanyService {
         restaurantCost,
       } = registerDto;
 
+      console.log(registerDto);
+
       const company = await this.companyModel.findOne({
         where: {
           company_id: companyId,
