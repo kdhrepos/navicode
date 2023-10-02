@@ -7,7 +7,7 @@ import { EmployeeModule } from './employee/employee.module';
 import { CompanyModule } from './company/company.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { sequelizeOptions } from './database/database.options';
+import { sequelizeOptions } from './database/sequelize.options';
 import { HTTPLoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({

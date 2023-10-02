@@ -4,11 +4,11 @@ import { IsNumber, IsString } from 'class-validator';
 export class EmployeeRegisterDto {
   @IsString()
   @ApiProperty({
-    example: 'Samsung',
-    description: 'Company name',
+    example: '67636c14-5e02-11ee-8c99-0242ac120002',
+    description: 'Company UUID',
     required: true,
   })
-  companyId: string;
+  companyUuid: string;
 
   @IsString()
   @ApiProperty({
@@ -18,10 +18,9 @@ export class EmployeeRegisterDto {
   })
   employeePhoneNumber: string;
 
-  @IsNumber()
   @ApiProperty({
     example: '19234934',
-    description: 'Employee number for company ',
+    description: 'Employee number',
     required: true,
   })
   employeeNumber: string;

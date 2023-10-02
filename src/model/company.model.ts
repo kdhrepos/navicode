@@ -9,7 +9,7 @@ export class Company extends Model {
   @Column
   restaurant_id: UUID;
 
-  @Column
+  @Column({ unique: true })
   company_id: string;
 
   @Column
@@ -17,4 +17,7 @@ export class Company extends Model {
 
   @Column
   company_name: string;
+
+  @Column
+  restaurant_cost: number;
 }

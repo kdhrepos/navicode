@@ -16,7 +16,7 @@ export class Employee extends Model {
   ticket_code: UUID;
 
   @Column
-  employee_number: number;
+  employee_number: string;
 
   @Column
   employee_name: string;

@@ -3,11 +3,6 @@ import { IsNumber, IsString } from 'class-validator';
 import { BeforeCreate } from 'sequelize-typescript';
 
 export class CompanySignUpDto {
-  // @IsString()
-
-  // @BeforeCreate({})
-  //   generateUuid() {
-  //   }
   @IsString()
   @ApiProperty({
     example: 'asd123',
