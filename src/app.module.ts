@@ -9,6 +9,7 @@ import { RestaurantModule } from './restaurant/restaurant.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { sequelizeOptions } from './database/sequelize.options';
 import { HTTPLoggerMiddleware } from './middleware/logger.middleware';
+import { TicketMiddleWare } from './middleware/ticket.middleware';
 
 @Module({
   imports: [
@@ -25,5 +26,6 @@ import { HTTPLoggerMiddleware } from './middleware/logger.middleware';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(HTTPLoggerMiddleware).forRoutes('*');
+    consumer.apply(TicketMiddleWare).forRoutes('/ticket/validation');
   }
 }

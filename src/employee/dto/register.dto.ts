@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsPhoneNumber, IsString } from 'class-validator';
 
 export class EmployeeRegisterDto {
   @IsString()
@@ -10,7 +10,7 @@ export class EmployeeRegisterDto {
   })
   companyUuid: string;
 
-  @IsString()
+  @IsPhoneNumber('KR')
   @ApiProperty({
     example: '010-1234-1234',
     description: 'Employee phone number',
@@ -18,6 +18,7 @@ export class EmployeeRegisterDto {
   })
   employeePhoneNumber: string;
 
+  @IsString()
   @ApiProperty({
     example: '19234934',
     description: 'Employee number',

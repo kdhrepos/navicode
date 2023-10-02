@@ -3,7 +3,7 @@ import { EmployeeService } from './employee.service';
 import { ApiTags } from '@nestjs/swagger';
 import { EmployeeRegisterDto } from './dto/register.dto';
 import { EmployeeSearchDto } from './dto/search.dto';
-import { EmployeeStatusCheckDto } from './dto/status-check.dto';
+import { EmployeeStatusCheckDto } from './dto/check-status.dto';
 import { EmployeeStatusSetDto } from './dto/set-status.dto';
 
 @ApiTags('Employee')

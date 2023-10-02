@@ -8,6 +8,7 @@ export const sequelizeOptions: SequelizeModuleOptions = {
   password: 'qwe123',
   database: 'navicode',
   autoLoadModels: true,
+  timezone: 'Asia/Seoul',
   synchronize: true,
   // sync: { alter: true },
   // sync: { force: true },

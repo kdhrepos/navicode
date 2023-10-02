@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsDate } from 'class-validator';
+import { IsString, IsDate } from 'class-validator';
 
 export class RestaurantRequestDto {
   @IsString()
@@ -16,7 +16,7 @@ export class RestaurantRequestDto {
     description: 'Start date to search',
     required: true,
   })
-  fromDate: string;
+  fromDate: Date;
 
   @IsDate()
   @ApiProperty({
@@ -24,7 +24,7 @@ export class RestaurantRequestDto {
     description: 'Last date to search',
     required: true,
   })
-  toDate: string;
+  toDate: Date;
 }
 
 export class CompanyRequestDto {
@@ -42,7 +42,7 @@ export class CompanyRequestDto {
     description: 'Start date to search',
     required: true,
   })
-  fromDate: string;
+  fromDate: Date;
 
   @IsDate()
   @ApiProperty({
@@ -50,5 +50,5 @@ export class CompanyRequestDto {
     description: 'Last date to search',
     required: true,
   })
-  toDate: string;
+  toDate: Date;
 }

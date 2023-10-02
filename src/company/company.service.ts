@@ -6,40 +6,81 @@ import { CompanyLoginDto } from './dto/login.dto';
 import { CompanySearchDto } from './dto/search.dto';
 import { Sequelize, where } from 'sequelize';
 import * as bcrypt from 'bcrypt';
+import { Restaurant } from 'src/model/restaurant.model';
+import { register } from 'module';
+import { v4 as uuidv4 } from 'uuid';
+import { Contraction } from 'src/model/contraction.model';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class CompanyService {
   constructor(
     @InjectModel(Company)
     private companyModel: typeof Company,
+
+    @InjectModel(Restaurant)
+    private restaurantModel: typeof Restaurant,
+
+    @InjectModel(Contraction)
+    private contractionModel: typeof Contraction,
   ) {}
 
-  private readonly logger = new Logger('CompanyService');
+  private readonly logger = new Logger('Company Service');
 
   async create(registerDto: CompanySignUpDto) {
     const functionName = CompanyService.prototype.create.name;
     try {
-      const companyExists = await this.companyModel.findOne({
+      const {
+        companyId,
+        companyPassword,
+        companyName,
+        restaurantName,
+        restaurantCost,
+      } = registerDto;
+
+      const company = await this.companyModel.findOne({
         where: {
-          company_id: registerDto.companyId,
+          company_id: companyId,
         },
       });
 
-      if (companyExists) {
+      if (company) {
         this.logger.error(`${functionName} : Duplicated company id`);
         throw new HttpException('Duplicated ID', HttpStatus.BAD_REQUEST);
       }
 
-      const hashedPassword = await bcrypt.hash(registerDto.companyPassword, 10);
+      const restaurant = await this.restaurantModel.findOne({
+        where: { restaurant_name: restaurantName },
+      });
+
+      const hashedPassword = await bcrypt.hash(companyPassword, 10);
+
+      let restaurantId;
+      const companyUuid = uuidv4().replace(/-/g, '');
+
+      if (restaurant) restaurantId = restaurant.id;
+      else {
+        restaurantId = uuidv4().replace(/-/g, '');
+        await this.restaurantModel.create({
+          id: restaurantId,
+          cost: restaurantCost,
+          restaurant_name: restaurantName,
+        });
+      }
 
       await this.companyModel.create({
-        id: Sequelize.literal('REPLACE(UUID(), "-", "")'),
-        restaurant_id: Sequelize.literal('REPLACE(UUID(), "-", "")'),
-        company_id: registerDto.companyId,
+        id: companyUuid,
+        restaurant_id: restaurantId,
+        company_id: companyId,
         company_password: hashedPassword,
-        company_name: registerDto.companyName,
-        restaurant_name: registerDto.restaurantName,
-        restaurant_cost: registerDto.restaurantCost,
+        company_name: companyName,
+        restaurant_name: restaurantName,
+        restaurant_cost: restaurantCost,
+      });
+
+      await this.contractionModel.create({
+        restaurant_id: restaurantId,
+        company_id: companyUuid,
       });
     } catch (error) {
       this.logger.error(`${error}`);
@@ -53,20 +94,20 @@ export class CompanyService {
   async findOne(companyLoginDto: CompanyLoginDto) {
     const functionName = CompanyService.prototype.findOne.name;
     try {
-      const companyExists = await this.companyModel.findOne({
+      const company = await this.companyModel.findOne({
         where: {
           company_id: companyLoginDto.companyId,
         },
       });
 
-      if (!companyExists) {
+      if (!company) {
         this.logger.error(`${functionName} : Company does not exists`);
         throw new HttpException('Wrong ID', HttpStatus.BAD_REQUEST);
       }
 
       const isPasswordCorrect = await bcrypt.compare(
         companyLoginDto.companyPassword,
-        companyExists.company_password,
+        company.company_password,
       );
 
       if (!isPasswordCorrect) {
@@ -89,7 +130,7 @@ export class CompanyService {
     try {
       const companyName = companySearchDto.companyName;
 
-      const searchedCompanies = await this.companyModel.findAll({
+      const companies = await this.companyModel.findAll({
         where: {
           company_name: companyName,
         },
@@ -98,7 +139,7 @@ export class CompanyService {
 
       this.logger.log(`${functionName} : Search company successfully done`);
 
-      return searchedCompanies;
+      return companies;
     } catch (error) {
       throw new HttpException(
         `${functionName} ${error}`,

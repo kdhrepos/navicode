@@ -1,12 +1,11 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Employee } from 'src/model/employee.model';
-import { EmployeeStatusCheckDto } from './dto/status-check.dto';
+import { EmployeeStatusCheckDto } from './dto/check-status.dto';
 import { EmployeeRegisterDto } from './dto/register.dto';
 import { Company } from 'src/model/company.model';
 import { EmployeeSearchDto } from './dto/search.dto';
 import { EmployeeStatusSetDto } from './dto/set-status.dto';
-import { Sequelize, UUID, UUIDV4 } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -19,7 +18,7 @@ export class EmployeeService {
     private companyModel: typeof Company,
   ) {}
 
-  private readonly logger = new Logger('EmployeeService');
+  private readonly logger = new Logger('Employee Service');
 
   async create(employeeRegisterDto: EmployeeRegisterDto) {
     const functionName = EmployeeService.prototype.create.name;
@@ -48,12 +47,12 @@ export class EmployeeService {
       }
 
       await this.employeeModel.create({
-        company_id: companyUuid,
         employee_phone_number: employeePhoneNumber,
+        company_id: companyUuid,
         restaurant_id: company.restaurant_id,
         ticket_code: null,
         employee_number: employeeNumber,
-        emplyoee_name: employeeName,
+        employee_name: employeeName,
         is_authenticated: false,
       });
 
@@ -68,7 +67,7 @@ export class EmployeeService {
   }
 
   async checkStatus(employeeStatusCheckDto: EmployeeStatusCheckDto) {
-    const functionName = EmployeeService.prototype.create.name;
+    const functionName = EmployeeService.prototype.checkStatus.name;
     try {
       const { employeePhoneNumber } = employeeStatusCheckDto;
 
@@ -95,7 +94,7 @@ export class EmployeeService {
   }
 
   async findAll(employeeSearchDto: EmployeeSearchDto): Promise<Employee[]> {
-    const functionName = EmployeeService.prototype.create.name;
+    const functionName = EmployeeService.prototype.findAll.name;
     try {
       const { companyId } = employeeSearchDto;
 
@@ -122,7 +121,7 @@ export class EmployeeService {
   }
 
   async update(employeeStatusSetDto: EmployeeStatusSetDto) {
-    const functionName = EmployeeService.prototype.create.name;
+    const functionName = EmployeeService.prototype.update.name;
     try {
       const { employeePhoneNumber, is_authenticated } = employeeStatusSetDto;
 
@@ -139,12 +138,12 @@ export class EmployeeService {
       if (!is_authenticated) {
         employee.ticket_code = null;
         employee.is_authenticated = is_authenticated;
-        employee.save();
+        await employee.save();
       } else {
         if (employee.ticket_code === null)
           employee.ticket_code = uuidv4().replace(/-/g, '');
         employee.is_authenticated = is_authenticated;
-        employee.save();
+        await employee.save();
       }
     } catch (error) {
       throw new HttpException(

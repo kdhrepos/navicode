@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsPhoneNumber, IsBoolean } from 'class-validator';
 
 export class EmployeeStatusSetDto {
+  @IsPhoneNumber('KR')
   @IsString()
   @ApiProperty({
     example: '010-1234-1234',
@@ -10,6 +11,7 @@ export class EmployeeStatusSetDto {
   })
   employeePhoneNumber: string;
 
+  @IsBoolean()
   @ApiProperty({
     example: 'True / False',
     description: 'Employee Status',
