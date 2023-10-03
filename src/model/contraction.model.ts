@@ -14,15 +14,15 @@ import { Restaurant } from './restaurant.model';
 export class Contraction extends Model {
   @ForeignKey(() => Company)
   @Column({ primaryKey: true })
-  company_id: UUID;
+  companyId: UUID;
 
   @ForeignKey(() => Restaurant)
   @Column
-  restaurant_id: UUID;
+  restaurantId: UUID;
 
-  @BelongsTo(() => Company, 'company_id')
+  @BelongsTo(() => Company, 'companyId')
   company: Company;
 
-  @BelongsTo(() => Restaurant, 'restaurant_id')
+  @BelongsTo(() => Restaurant, 'restaurantId')
   restaurant: Restaurant;
 }

@@ -16,19 +16,18 @@ export class Sale extends Model {
 
   @ForeignKey(() => Company)
   @Column
-  company_id: UUID;
+  companyId: UUID;
 
   @ForeignKey(() => Restaurant)
   @Column
-  restaurant_id: UUID;
+  restaurantId: UUID;
 
   @Column
   amount: number;
 
-  Relations;
-  @BelongsTo(() => Company, 'company_id')
+  @BelongsTo(() => Company, 'companyId')
   company: Company;
 
-  @BelongsTo(() => Restaurant, 'restaurant_id')
+  @BelongsTo(() => Restaurant, 'restaurantId')
   restaurant: Restaurant;
 }

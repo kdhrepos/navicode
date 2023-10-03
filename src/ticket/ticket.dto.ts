@@ -51,7 +51,7 @@ export class CompanyRequestDto {
     description: 'Company Unique UUID',
     required: true,
   })
-  companyUuid: string;
+  companyUUID: string;
 }
 
 export class RestaurantRequestDto {

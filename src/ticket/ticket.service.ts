@@ -69,37 +69,49 @@ export class TicketService {
 
       if (checkUsedTicket) {
         this.logger.error(`${functionName} : Ticket already used`);
-        throw new HttpException('Ticket already used', HttpStatus.BAD_REQUEST);
+        return response
+          .status(200)
+          .json({ status: 600, msg: 'Error : This Ticket is already used' });
+        // throw new HttpException('Ticket already used', HttpStatus.BAD_REQUEST);
       }
 
       const employee = await this.employeeModel.findByPk(employeePhoneNumber);
 
       if (!employee) {
         this.logger.error(`${functionName} : Employee doesn't exist`);
-        throw new HttpException(
-          'Wrong employee phone number',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response
+          .status(200)
+          .json({ status: 400, msg: "Error : Employee doesn't exist" });
+        // throw new HttpException(
+          // 'Wrong employee phone number',
+          // HttpStatus.BAD_REQUEST,
+        // );
       }
 
-      if (employee.ticket_code !== ticketCode) {
+      if (employee.ticketCode !== ticketCode) {
         this.logger.error(`${functionName} : Wrong ticket code`);
-        throw new HttpException('Wrong ticket code', HttpStatus.BAD_REQUEST);
+        return response
+        .status(200)
+        .json({ status: 400, msg: 'Error : Incorrect ticket code' });
+        // throw new HttpException('Wrong ticket code', HttpStatus.BAD_REQUEST);
       }
 
       if (!this.checkTimeout(timeStamp)) {
         this.logger.error(`${functionName} : Time out ticket`);
-        throw new HttpException('Time out ticket', HttpStatus.BAD_REQUEST);
+        return response
+        .status(200)
+        .json({ status: 500, msg: 'Error : Time over' });
+        // throw new HttpException('Time out ticket', HttpStatus.BAD_REQUEST);
       }
 
       // Ticket Save
       await this.ticketModel.create({
         id: uuid,
-        employee_count: employeeCount,
-        company_id: employee.company_id,
-        restaurant_id: employee.restaurant_id,
-        timestamp: timeStamp,
-        employee_phone_number: employeePhoneNumber,
+        employeeCount: employeeCount,
+        companyId: employee.companyId,
+        restaurantId: employee.restaurantId,
+        timeStamp: timeStamp,
+        employeePhoneNumber: employeePhoneNumber,
       });
       // Ticket Save
 
@@ -117,12 +129,12 @@ export class TicketService {
       let todayISOString = today.toISOString();
       let tomorrowISOString = tomorrow.toISOString();
 
-      const restaurant = await Restaurant.findByPk(employee.restaurant_id);
+      const restaurant = await Restaurant.findByPk(employee.restaurantId);
       const cost = restaurant.cost;
 
       const formerSale = await this.saleModel.findAll({
         where: {
-          company_id: employee.company_id,
+          companyId: employee.companyId,
           createdAt: {
             [Op.lt]: tomorrowISOString,
             [Op.gte]: todayISOString,
@@ -134,15 +146,19 @@ export class TicketService {
         await this.saleModel.create({
           id: uuidv4().replace(/-/g, ''),
           amount: cost * employeeCount,
-          company_id: employee.company_id,
-          restaurant_id: restaurant.id,
+          companyId: employee.companyId,
+          restaurantId: restaurant.id,
         });
         return;
       }
 
       formerSale[0].amount = formerSale[0].amount + cost * employeeCount;
       await formerSale[0].save();
-      return;
+      
+      return response.status(200).json({
+        status: 200,
+        msg: "Authentificated",
+      });
     } catch (error) {
       // throw new HttpException(
       //   `${functionName} ${error}`,
@@ -166,7 +182,7 @@ export class TicketService {
 
       const restaurant = await this.restaurantModel.findOne({
         where: {
-          restaurant_name: restaurantName,
+          restaurantName: restaurantName,
         },
       });
 
@@ -183,8 +199,13 @@ export class TicketService {
 
       const tickets = await this.ticketModel.findAll({
         where: {
-          restaurant_id: restaurant.id,
-        },
+          restaurantId: restaurant.id,
+        },include:[
+          {
+            model:Company,
+            attributes:['companyName'],
+          }
+        ]
       });
 
       return response.status(200).json({
@@ -208,9 +229,9 @@ export class TicketService {
   ) {
     const functionName = TicketService.prototype.findAllExpenses.name;
     try {
-      const { companyUuid } = companyRequestDto;
+      const { companyUUID } = companyRequestDto;
 
-      const company = await this.companyModel.findByPk(companyUuid);
+      const company = await this.companyModel.findByPk(companyUUID);
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
@@ -222,19 +243,25 @@ export class TicketService {
 
       const tickets = await this.ticketModel.findAll({
         where: {
-          company_id: company.id,
+          companyId: company.id,
         },
+        include:[
+          {
+            model:Employee,
+            attributes : ["employeeNumber","employeeName"],
+          }
+        ]
       });
 
       const restaurant = await this.restaurantModel.findByPk(
-        tickets[0].restaurant_id,
+        tickets[0].restaurantId,
       );
       return response.status(200).json({
         status: '200',
         msg: 'Ticket successfully found',
         data: {
           tickets,
-          restaurantName: restaurant.restaurant_name,
+          restaurantName: restaurant.restaurantName,
         },
       });
     } catch (error) {

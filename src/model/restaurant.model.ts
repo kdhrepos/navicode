@@ -13,7 +13,7 @@ export class Restaurant extends Model {
   cost: number;
 
   @Column
-  restaurant_name: string;
+  restaurantName: string;
 
   @HasMany(() => Ticket)
   ticket: Ticket[];

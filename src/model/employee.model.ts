@@ -13,28 +13,28 @@ import { Ticket } from './ticket.model';
 @Table({ freezeTableName: true })
 export class Employee extends Model {
   @Column({ primaryKey: true })
-  employee_phone_number: string;
+  employeePhoneNumber: string;
 
   @ForeignKey(() => Company)
   @Column
-  company_id: UUID;
+  companyId: UUID;
 
   @Column
-  restaurant_id: UUID;
+  restaurantId: UUID;
 
   @Column({ allowNull: true, defaultValue: null })
-  ticket_code: UUID;
+  ticketCode: UUID;
 
   @Column
-  employee_number: string;
+  employeeNumber: string;
 
   @Column
-  employee_name: string;
+  employeeName: string;
 
   @Column({ defaultValue: false })
-  is_authenticated: boolean;
+  isAuthenticated: boolean;
 
-  @BelongsTo(() => Company, 'company_id')
+  @BelongsTo(() => Company, 'companyId')
   company: Company;
 
   @HasMany(() => Ticket)

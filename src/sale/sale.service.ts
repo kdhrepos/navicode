@@ -28,11 +28,13 @@ export class SaleService {
   ) {
     const functionName = SaleService.prototype.findAllSales.name;
     try {
-      const { restaurantName, fromDate, toDate } = restaurantRequestDto;
+      const { restaurantName, from, to } = restaurantRequestDto;
+
+      to.setDate(to.getDate()+1);
 
       const restaurant = await this.restaurantModel.findOne({
         where: {
-          restaurant_name: restaurantName,
+          restaurantName: restaurantName,
         },
       });
 
@@ -49,16 +51,16 @@ export class SaleService {
 
       const sales = await this.saleModel.findAll({
         where: {
-          restaurant_id: restaurant.id,
+          restaurantId: restaurant.id,
           createdAt: {
-            [Op.lt]: toDate,
-            [Op.gte]: fromDate,
+            [Op.lt]: to,
+            [Op.gte]: from,
           },
         },
         include: [
           {
             model: Company,
-            attributes: ['company_name'],
+            attributes: ['companyName'],
           },
         ],
       });
@@ -87,9 +89,13 @@ export class SaleService {
   ) {
     const functionName = SaleService.prototype.findAllExpenses.name;
     try {
-      const { companyId, fromDate, toDate } = companyRequestDto;
+      const { companyUUID, from, to } = companyRequestDto;
+      
+      console.log(companyRequestDto);
 
-      const company = await this.companyModel.findByPk(companyId);
+      to.setDate(to.getDate()+1);
+
+      const company = await this.companyModel.findByPk(companyUUID);
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
@@ -102,16 +108,16 @@ export class SaleService {
 
       const sales = await this.saleModel.findAll({
         where: {
-          company_id: company.id,
+          companyId: company.id,
           createdAt: {
-            [Op.lt]: toDate,
-            [Op.gte]: fromDate,
+            [Op.lt]: to,
+            [Op.gte]: from,
           },
         },
         include: [
           {
             model: Restaurant,
-            attributes: ['restaurant_name', 'cost'],
+            attributes: ['restaurantName', 'cost'],
           },
         ],
       });

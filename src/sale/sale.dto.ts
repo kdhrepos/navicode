@@ -16,7 +16,7 @@ export class RestaurantRequestDto {
     description: 'Start date to search',
     required: true,
   })
-  fromDate: Date;
+  from: Date;
 
   @IsDate()
   @ApiProperty({
@@ -24,7 +24,7 @@ export class RestaurantRequestDto {
     description: 'Last date to search',
     required: true,
   })
-  toDate: Date;
+  to: Date;
 }
 
 export class CompanyRequestDto {
@@ -34,7 +34,7 @@ export class CompanyRequestDto {
     description: 'Company Unique UUID',
     required: true,
   })
-  companyId: string;
+  companyUUID: string;
 
   @IsDate()
   @ApiProperty({
@@ -42,7 +42,7 @@ export class CompanyRequestDto {
     description: 'Start date to search',
     required: true,
   })
-  fromDate: Date;
+  from: Date;
 
   @IsDate()
   @ApiProperty({
@@ -50,5 +50,5 @@ export class CompanyRequestDto {
     description: 'Last date to search',
     required: true,
   })
-  toDate: Date;
+  to: Date;
 }

@@ -8,7 +8,7 @@ export class EmployeeRegisterDto {
     description: 'Company UUID',
     required: true,
   })
-  companyUuid: string;
+  companyUUID: string;
 
   @IsPhoneNumber('KR')
   @ApiProperty({

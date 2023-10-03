@@ -24,10 +24,10 @@ export class EmployeeService {
   async create(response: Response, employeeRegisterDto: EmployeeRegisterDto) {
     const functionName = EmployeeService.prototype.create.name;
     try {
-      const { companyUuid, employeePhoneNumber, employeeNumber, employeeName } =
+      const { companyUUID, employeePhoneNumber, employeeNumber, employeeName } =
         employeeRegisterDto;
 
-      const company = await this.companyModel.findByPk(companyUuid);
+      const company = await this.companyModel.findByPk(companyUUID);
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
@@ -56,13 +56,13 @@ export class EmployeeService {
       }
 
       await this.employeeModel.create({
-        employee_phone_number: employeePhoneNumber,
-        company_id: companyUuid,
-        restaurant_id: company.restaurant_id,
-        ticket_code: null,
-        employee_number: employeeNumber,
-        employee_name: employeeName,
-        is_authenticated: false,
+        employeePhoneNumber: employeePhoneNumber,
+        companyId: companyUUID,
+        restaurantId: company.restaurantId,
+        ticketCode: null,
+        employeeNumber: employeeNumber,
+        employeeName: employeeName,
+        isAuthenticated: false,
       });
 
       this.logger.log(`${functionName} : Employee successfully registered`);
@@ -144,7 +144,7 @@ export class EmployeeService {
 
       const employeeList = await this.employeeModel.findAll({
         where: {
-          company_id: companyId,
+          companyId: companyId,
         },
       });
 
@@ -171,8 +171,9 @@ export class EmployeeService {
   async update(response: Response, employeeStatusSetDto: EmployeeStatusSetDto) {
     const functionName = EmployeeService.prototype.update.name;
     try {
-      const { employeePhoneNumber, is_authenticated } = employeeStatusSetDto;
+      const { employeePhoneNumber, isAuthenticated } = employeeStatusSetDto;
 
+      console.log(employeeStatusSetDto)
       const employee = await this.employeeModel.findByPk(employeePhoneNumber);
 
       if (!employee) {
@@ -187,9 +188,9 @@ export class EmployeeService {
         // );
       }
 
-      if (!is_authenticated) {
-        employee.ticket_code = null;
-        employee.is_authenticated = is_authenticated;
+      if (!isAuthenticated) {
+        employee.ticketCode = null;
+        employee.isAuthenticated = isAuthenticated;
 
         await employee.save();
 
@@ -198,9 +199,9 @@ export class EmployeeService {
           msg: 'Employee ticket denied',
         });
       } else {
-        if (employee.ticket_code === null)
-          employee.ticket_code = uuidv4().replace(/-/g, '');
-        employee.is_authenticated = is_authenticated;
+        if (employee.ticketCode === null)
+          employee.ticketCode = uuidv4().replace(/-/g, '');
+        employee.isAuthenticated = isAuthenticated;
 
         await employee.save();
 

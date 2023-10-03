@@ -32,16 +32,14 @@ export class CompanyController {
     return await this.companyService.create(response, companyRegisterDto);
   }
 
-  @HttpCode(200)
   @Post('login')
   async login(
     @Res() response: Response,
     @Body() companyLoginDto: CompanyLoginDto,
   ) {
-    return await this.companyService.findOne(response, companyLoginDto);
+    return await this.companyService.login(response, companyLoginDto);
   }
 
-  @HttpCode(200)
   @Get('search')
   async searchCompanies(
     @Res() response: Response,
@@ -50,9 +48,10 @@ export class CompanyController {
     return await this.companyService.findAll(response, companySearchDto);
   }
 
-  @HttpCode(200)
   @Get('info')
-  async getInformation(@Query() companyInfoDto: CompanyInfoDto) {
-    // return await this.companyService.findOne(response, companyInfoDto);
+  async getInformation(
+    @Res() response: Response,
+    @Query() companyInfoDto: CompanyInfoDto) {
+    return await this.companyService.findOne(response, companyInfoDto);
   }
 }

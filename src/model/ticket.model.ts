@@ -17,28 +17,28 @@ export class Ticket extends Model {
 
   @ForeignKey(() => Employee)
   @Column
-  employee_phone_number: UUID;
+  employeePhoneNumber: UUID;
 
   @ForeignKey(() => Restaurant)
   @Column
-  restaurant_id: UUID;
+  restaurantId: UUID;
 
   @ForeignKey(() => Company)
   @Column
-  company_id: UUID;
+  companyId: UUID;
 
   @Column
-  employee_count: number;
+  employeeCount: number;
 
   @Column
-  timestamp: Date;
+  timeStamp: Date;
 
-  @BelongsTo(() => Employee, 'employee_phone_number')
+  @BelongsTo(() => Employee, 'employeePhoneNumber')
   employee: Employee;
 
-  @BelongsTo(() => Company, 'company_id')
+  @BelongsTo(() => Company, 'companyId')
   company: Company;
 
-  @BelongsTo(() => Restaurant, 'restaurant_id')
+  @BelongsTo(() => Restaurant, 'restaurantId')
   restaurant: Restaurant;
 }

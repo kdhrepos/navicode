@@ -17,5 +17,5 @@ export class EmployeeStatusSetDto {
     description: 'Employee Status',
     required: true,
   })
-  is_authenticated: boolean;
+  isAuthenticated: boolean;
 }

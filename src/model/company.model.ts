@@ -13,19 +13,19 @@ export class Company extends Model {
   id: UUID;
 
   @Column 
-  restaurant_id: UUID;
+  restaurantId: UUID;
 
   @Column({ unique: true })
-  company_id: string;
+  companyId: string;
 
   @Column
-  company_password: string;
+  companyPassword: string;
 
   @Column
-  company_name: string;
+  companyName: string;
 
   @Column
-  restaurant_cost: number;
+  restaurantCost: number;
 
   // Relations
   @HasOne(() => Contraction)
