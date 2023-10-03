@@ -29,16 +29,20 @@ export class CompanyController {
     return await this.companyService.create(companyRegisterDto);
   }
 
+  @HttpCode(200)
   @Post('login')
   async login(@Body() companyLoginDto: CompanyLoginDto) {
     return await this.companyService.findOne(companyLoginDto);
   }
 
+
+  @HttpCode(200)
   @Get('search')
   async searchCompanies(@Body() companySearchDto: CompanySearchDto) {
     return await this.companyService.findAll(companySearchDto);
   }
-
+  
+  @HttpCode(200)
   @Get('info')
   async getInformation(@Query() companyInfoDto: CompanyInfoDto) {
     // return await this.companyService.findOne(response, companyInfoDto);
