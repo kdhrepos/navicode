@@ -6,6 +6,7 @@ import { CompanyRequestDto, RestaurantRequestDto } from './sale.dto';
 import { Restaurant } from 'src/model/restaurant.model';
 import { Company } from 'src/model/company.model';
 import { Op } from 'sequelize';
+import { Response } from 'express';
 
 @Injectable()
 export class SaleService {
@@ -21,7 +22,10 @@ export class SaleService {
   ) {}
   private readonly logger = new Logger('Sale Service');
 
-  async findAllSales(restaurantRequestDto: RestaurantRequestDto) {
+  async findAllSales(
+    response: Response,
+    restaurantRequestDto: RestaurantRequestDto,
+  ) {
     const functionName = SaleService.prototype.findAllSales.name;
     try {
       const { restaurantName, fromDate, toDate } = restaurantRequestDto;
@@ -34,10 +38,13 @@ export class SaleService {
 
       if (!restaurant) {
         this.logger.error(`${functionName} : Restaurant does not exist`);
-        throw new HttpException(
-          'Wrong restaurant name',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response
+          .status(500)
+          .json({ status: 500, msg: "Error : Restaurant doesn't exist" });
+        // throw new HttpException(
+        //   'Wrong restaurant name',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
       const sales = await this.saleModel.findAll({
@@ -56,16 +63,28 @@ export class SaleService {
         ],
       });
 
-      return sales;
+      return response.status(200).json({
+        status: 200,
+        msg: 'Sales record successfully sended',
+        data: { sales, cost: restaurant.cost },
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async findAllExpenses(companyRequestDto: CompanyRequestDto) {
+  async findAllExpenses(
+    response: Response,
+    companyRequestDto: CompanyRequestDto,
+  ) {
     const functionName = SaleService.prototype.findAllExpenses.name;
     try {
       const { companyId, fromDate, toDate } = companyRequestDto;
@@ -74,10 +93,14 @@ export class SaleService {
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
-        throw new HttpException('Wrong company id', HttpStatus.BAD_REQUEST);
+
+        return response
+          .status(500)
+          .json({ status: 500, msg: 'Error : Company does not exist' });
+        // throw new HttpException('Wrong company id', HttpStatus.BAD_REQUEST);
       }
 
-      const expenses = await this.saleModel.findAll({
+      const sales = await this.saleModel.findAll({
         where: {
           company_id: company.id,
           createdAt: {
@@ -93,14 +116,21 @@ export class SaleService {
         ],
       });
 
-      return expenses;
+      return response.status(200).json({
+        status: 200,
+        msg: 'Expenses record successfully sended',
+        salesData: { sales },
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
-
-  async create() {}
 }

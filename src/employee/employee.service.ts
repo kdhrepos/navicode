@@ -7,6 +7,7 @@ import { Company } from 'src/model/company.model';
 import { EmployeeSearchDto } from './dto/search.dto';
 import { EmployeeStatusSetDto } from './dto/set-status.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { Response } from 'express';
 
 @Injectable()
 export class EmployeeService {
@@ -20,7 +21,7 @@ export class EmployeeService {
 
   private readonly logger = new Logger('Employee Service');
 
-  async create(employeeRegisterDto: EmployeeRegisterDto) {
+  async create(response: Response, employeeRegisterDto: EmployeeRegisterDto) {
     const functionName = EmployeeService.prototype.create.name;
     try {
       const { companyUuid, employeePhoneNumber, employeeNumber, employeeName } =
@@ -30,20 +31,28 @@ export class EmployeeService {
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
-        throw new HttpException(
-          'Company does not exist',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response.status(400).json({
+          status: 400,
+          msg: "Error : Company doesn't exist",
+        });
+        // throw new HttpException(
+        //   'Company does not exist',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
       const employee = await this.employeeModel.findByPk(employeePhoneNumber);
 
       if (employee) {
         this.logger.error(`${functionName} : Duplicated Phone Number`);
-        throw new HttpException(
-          'Duplicated Phone Number',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response.status(400).json({
+          status: 400,
+          msg: 'Error : Duplicated Phone Number',
+        });
+        // throw new HttpException(
+        //   'Duplicated Phone Number',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
       await this.employeeModel.create({
@@ -57,16 +66,29 @@ export class EmployeeService {
       });
 
       this.logger.log(`${functionName} : Employee successfully registered`);
-      return true;
+
+      return response.status(200).json({
+        status: 200,
+        msg: 'Employee information successfully saved',
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // this.logger.error(`${error}`);
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async checkStatus(employeeStatusCheckDto: EmployeeStatusCheckDto) {
+  async checkStatus(
+    response: Response,
+    employeeStatusCheckDto: EmployeeStatusCheckDto,
+  ) {
     const functionName = EmployeeService.prototype.checkStatus.name;
     try {
       const { employeePhoneNumber } = employeeStatusCheckDto;
@@ -75,25 +97,36 @@ export class EmployeeService {
 
       if (!employee) {
         this.logger.error(`${functionName} : Employee doesn't exist`);
-        throw new HttpException(
-          'Wrong employee information',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response
+          .status(500)
+          .json({ status: 500, msg: "Error : Employee doesn't exists" });
+        // throw new HttpException(
+        //   'Wrong employee information',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
-      return {
-        status: employee.is_authenticated,
-        ticketCode: employee.ticket_code,
-      };
+      return response.status(200).json({
+        status: '200',
+        msg: 'Employee status successfully sended',
+        data: {
+          employee,
+        },
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async findAll(employeeSearchDto: EmployeeSearchDto): Promise<Employee[]> {
+  async findAll(response: Response, employeeSearchDto: EmployeeSearchDto) {
     const functionName = EmployeeService.prototype.findAll.name;
     try {
       const { companyId } = employeeSearchDto;
@@ -101,8 +134,12 @@ export class EmployeeService {
       const company = await this.companyModel.findByPk(companyId);
 
       if (!company) {
-        this.logger.error(`${functionName} : Company does not exists`);
-        throw new HttpException('Wrong UUID', HttpStatus.BAD_REQUEST);
+        this.logger.error(`${functionName} : Company does not exist`);
+        return response.status(400).json({
+          status: 400,
+          msg: 'Company does not exist',
+        });
+        // throw new HttpException('Wrong UUID', HttpStatus.BAD_REQUEST);
       }
 
       const employeeList = await this.employeeModel.findAll({
@@ -111,16 +148,27 @@ export class EmployeeService {
         },
       });
 
-      return employeeList;
+      return response.status(200).json({
+        status: 200,
+        msg: 'Employee list successfully sended',
+        data: {
+          employeeList,
+        },
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async update(employeeStatusSetDto: EmployeeStatusSetDto) {
+  async update(response: Response, employeeStatusSetDto: EmployeeStatusSetDto) {
     const functionName = EmployeeService.prototype.update.name;
     try {
       const { employeePhoneNumber, is_authenticated } = employeeStatusSetDto;
@@ -129,27 +177,48 @@ export class EmployeeService {
 
       if (!employee) {
         this.logger.error(`${functionName} : Employee does not exist`);
-        throw new HttpException(
-          'Wrong employee phone number',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response.status(500).json({
+          status: '500',
+          msg: "Employee doesn't exist",
+        });
+        // throw new HttpException(
+        //   'Wrong employee phone number',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
       if (!is_authenticated) {
         employee.ticket_code = null;
         employee.is_authenticated = is_authenticated;
+
         await employee.save();
+
+        return response.status(200).json({
+          status: '200',
+          msg: 'Employee ticket denied',
+        });
       } else {
         if (employee.ticket_code === null)
           employee.ticket_code = uuidv4().replace(/-/g, '');
         employee.is_authenticated = is_authenticated;
+
         await employee.save();
+
+        return response.status(200).json({
+          status: '200',
+          msg: 'Employee ticket allowed',
+        });
       }
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 }

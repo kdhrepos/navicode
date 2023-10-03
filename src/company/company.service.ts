@@ -1,16 +1,20 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  Res,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Company } from 'src/model/company.model';
 import { CompanySignUpDto } from './dto/sign-up.dto';
 import { CompanyLoginDto } from './dto/login.dto';
 import { CompanySearchDto } from './dto/search.dto';
-import { Sequelize, where } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 import { Restaurant } from 'src/model/restaurant.model';
-import { register } from 'module';
 import { v4 as uuidv4 } from 'uuid';
 import { Contraction } from 'src/model/contraction.model';
-import { UUID } from 'crypto';
+import { Response } from 'express';
 
 @Injectable()
 export class CompanyService {
@@ -27,7 +31,7 @@ export class CompanyService {
 
   private readonly logger = new Logger('Company Service');
 
-  async create(registerDto: CompanySignUpDto) {
+  async create(response: Response, registerDto: CompanySignUpDto) {
     const functionName = CompanyService.prototype.create.name;
     try {
       const {
@@ -38,9 +42,7 @@ export class CompanyService {
         restaurantCost,
       } = registerDto;
 
-      console.log(registerDto);
-
-      const company = await this.companyModel.findOne({
+      let company = await this.companyModel.findOne({
         where: {
           company_id: companyId,
         },
@@ -48,10 +50,14 @@ export class CompanyService {
 
       if (company) {
         this.logger.error(`${functionName} : Duplicated company id`);
-        throw new HttpException('Duplicated ID', HttpStatus.BAD_REQUEST);
+        return response.status(400).json({
+          status: '400',
+          msg: 'Duplicated company id',
+        });
+        // throw new HttpException('Duplicated ID', HttpStatus.BAD_REQUEST);
       }
 
-      const restaurant = await this.restaurantModel.findOne({
+      let restaurant = await this.restaurantModel.findOne({
         where: { restaurant_name: restaurantName },
       });
 
@@ -63,14 +69,14 @@ export class CompanyService {
       if (restaurant) restaurantId = restaurant.id;
       else {
         restaurantId = uuidv4().replace(/-/g, '');
-        await this.restaurantModel.create({
+        restaurant = await this.restaurantModel.create({
           id: restaurantId,
           cost: restaurantCost,
           restaurant_name: restaurantName,
         });
       }
 
-      await this.companyModel.create({
+      company = await this.companyModel.create({
         id: companyUuid,
         restaurant_id: restaurantId,
         company_id: companyId,
@@ -84,16 +90,30 @@ export class CompanyService {
         restaurant_id: restaurantId,
         company_id: companyUuid,
       });
+
+      return response.status(200).json({
+        status: '200',
+        msg: 'Company successfully registered',
+        data: {
+          restaurant,
+          company,
+        },
+      });
     } catch (error) {
-      this.logger.error(`${error}`);
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // this.logger.error(`${error}`);
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async findOne(companyLoginDto: CompanyLoginDto) {
+  async findOne(response: Response, companyLoginDto: CompanyLoginDto) {
     const functionName = CompanyService.prototype.findOne.name;
     try {
       const company = await this.companyModel.findOne({
@@ -104,7 +124,10 @@ export class CompanyService {
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exists`);
-        throw new HttpException('Wrong ID', HttpStatus.BAD_REQUEST);
+        return response
+          .status(400)
+          .json({ status: '400', msg: 'Error : Wrong id' });
+        // throw new HttpException('Wrong ID', HttpStatus.BAD_REQUEST);
       }
 
       const isPasswordCorrect = await bcrypt.compare(
@@ -113,21 +136,40 @@ export class CompanyService {
       );
 
       if (!isPasswordCorrect) {
-        this.logger.error(`${functionName} : Company does not exists`);
-        throw new HttpException('Wrong password', HttpStatus.BAD_REQUEST);
+        this.logger.error(`${functionName} : Wrong password`);
+        return response
+          .status(400)
+          .json({ status: '400', msg: 'Error : Wrong password' });
+        // throw new HttpException('Wrong password', HttpStatus.BAD_REQUEST);
       }
 
-      this.logger.log(`${functionName} : User successfully logined`);
-      return true;
-    } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      const contractionInfo = await this.contractionModel.findByPk(company.id);
+
+      const restaurant = await this.restaurantModel.findByPk(
+        contractionInfo.restaurant_id,
       );
+
+      this.logger.log(`${functionName} : Company successfully logined`);
+
+      return response.status(200).json({
+        status: '200',
+        msg: 'Login successed',
+        data: { company, restaurant },
+      });
+    } catch (error) {
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async findAll(companySearchDto: CompanySearchDto): Promise<Company[]> {
+  async findAll(response: Response, companySearchDto: CompanySearchDto) {
     const functionName = CompanyService.prototype.findAll.name;
     try {
       const companyName = companySearchDto.companyName;
@@ -139,14 +181,25 @@ export class CompanyService {
         attributes: ['id', 'company_name'],
       });
 
-      this.logger.log(`${functionName} : Search company successfully done`);
+      this.logger.log(`${functionName} : Company list successfully sended`);
 
-      return companies;
+      return response.status(200).json({
+        status: '200',
+        msg: 'Company list successfully sended',
+        data: {
+          companies,
+        },
+      });
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 }

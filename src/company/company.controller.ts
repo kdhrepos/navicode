@@ -8,6 +8,7 @@ import {
   Request,
   HttpStatus,
   HttpCode,
+  Res,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
@@ -22,26 +23,33 @@ import { Response } from 'express';
 export class CompanyController {
   constructor(private companyService: CompanyService) {}
 
-  @HttpCode(200)
   @ApiOperation({ description: 'Sign up for company' })
   @Post('sign-up')
-  async signUp(@Body() companyRegisterDto: CompanySignUpDto) {
-    return await this.companyService.create(companyRegisterDto);
+  async signUp(
+    @Res() response: Response,
+    @Body() companyRegisterDto: CompanySignUpDto,
+  ) {
+    return await this.companyService.create(response, companyRegisterDto);
   }
 
   @HttpCode(200)
   @Post('login')
-  async login(@Body() companyLoginDto: CompanyLoginDto) {
-    return await this.companyService.findOne(companyLoginDto);
+  async login(
+    @Res() response: Response,
+    @Body() companyLoginDto: CompanyLoginDto,
+  ) {
+    return await this.companyService.findOne(response, companyLoginDto);
   }
-
 
   @HttpCode(200)
   @Get('search')
-  async searchCompanies(@Body() companySearchDto: CompanySearchDto) {
-    return await this.companyService.findAll(companySearchDto);
+  async searchCompanies(
+    @Res() response: Response,
+    @Body() companySearchDto: CompanySearchDto,
+  ) {
+    return await this.companyService.findAll(response, companySearchDto);
   }
-  
+
   @HttpCode(200)
   @Get('info')
   async getInformation(@Query() companyInfoDto: CompanyInfoDto) {

@@ -13,6 +13,7 @@ import { Employee } from 'src/model/employee.model';
 import { Sale } from 'src/model/sale.model';
 import { Op } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
+import { Response } from 'express';
 
 @Injectable()
 export class TicketService {
@@ -50,7 +51,10 @@ export class TicketService {
     return true;
   };
 
-  async validationCheck(ticketValidationDto: TicketValidationDto) {
+  async validationCheck(
+    response: Response,
+    ticketValidationDto: TicketValidationDto,
+  ) {
     const functionName = TicketService.prototype.validationCheck.name;
     try {
       const {
@@ -140,14 +144,22 @@ export class TicketService {
       await formerSale[0].save();
       return;
     } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 
-  async findAllSales(restaurantRequestDto: RestaurantRequestDto) {
+  async findAllSales(
+    response: Response,
+    restaurantRequestDto: RestaurantRequestDto,
+  ) {
     const functionName = TicketService.prototype.findAllSales.name;
     try {
       const { restaurantName } = restaurantRequestDto;
@@ -160,19 +172,28 @@ export class TicketService {
 
       if (!restaurant) {
         this.logger.error(`${functionName} : Restaurant does not exist`);
-        throw new HttpException(
-          'Wrong restaurant name',
-          HttpStatus.BAD_REQUEST,
-        );
+        return response
+          .status(500)
+          .json({ status: '500', msg: 'Error : Restaurant does not exist' });
+        // throw new HttpException(
+        //   'Wrong restaurant name',
+        //   HttpStatus.BAD_REQUEST,
+        // );
       }
 
-      const ticket = await this.ticketModel.findAll({
+      const tickets = await this.ticketModel.findAll({
         where: {
           restaurant_id: restaurant.id,
         },
       });
 
-      return ticket;
+      return response.status(200).json({
+        status: '200',
+        msg: 'Ticket successfully found',
+        data: {
+          tickets,
+        },
+      });
     } catch (error) {
       throw new HttpException(
         `${functionName} ${error}`,
@@ -181,7 +202,10 @@ export class TicketService {
     }
   }
 
-  async findAllExpenses(companyRequestDto: CompanyRequestDto) {
+  async findAllExpenses(
+    response: Response,
+    companyRequestDto: CompanyRequestDto,
+  ) {
     const functionName = TicketService.prototype.findAllExpenses.name;
     try {
       const { companyUuid } = companyRequestDto;
@@ -190,21 +214,39 @@ export class TicketService {
 
       if (!company) {
         this.logger.error(`${functionName} : Company does not exist`);
-        throw new HttpException('Wrong company uuid', HttpStatus.BAD_REQUEST);
+        return response
+          .status(500)
+          .json({ status: '500', msg: 'Error : Company does not exist' });
+        // throw new HttpException('Wrong company uuid', HttpStatus.BAD_REQUEST);
       }
 
-      const ticket = await this.ticketModel.findAll({
+      const tickets = await this.ticketModel.findAll({
         where: {
           company_id: company.id,
         },
       });
 
-      return ticket;
-    } catch (error) {
-      throw new HttpException(
-        `${functionName} ${error}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      const restaurant = await this.restaurantModel.findByPk(
+        tickets[0].restaurant_id,
       );
+      return response.status(200).json({
+        status: '200',
+        msg: 'Ticket successfully found',
+        data: {
+          tickets,
+          restaurantName: restaurant.restaurant_name,
+        },
+      });
+    } catch (error) {
+      // throw new HttpException(
+      //   `${functionName} ${error}`,
+      //   HttpStatus.INTERNAL_SERVER_ERROR,
+      // );
+      this.logger.error(`${functionName} : ${error}`);
+      return response.status(500).json({
+        status: '500',
+        msg: `${error}`,
+      });
     }
   }
 }

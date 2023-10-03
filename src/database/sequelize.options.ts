@@ -3,7 +3,7 @@ import { SequelizeModuleOptions } from '@nestjs/sequelize';
 export const sequelizeOptions: SequelizeModuleOptions = {
   dialect: 'mysql',
   host: 'localhost',
-  port: 8194,
+  port: 3306,
   username: 'root',
   password: 'qwe123',
   database: 'navicode',
