@@ -206,11 +206,11 @@ export class CompanyService {
     try {
       const companyName = companySearchDto.companyName;
 
-      const companies = await this.companyModel.findAll({
+      const companyNameList = await this.companyModel.findAll({
         where: {
           companyName: companyName,
         },
-        attributes: ['id', 'companyName'],
+        attributes: ['id' as 'companyId', 'companyName'],
       });
 
       this.logger.log(`${functionName} : Company list successfully sended`);
@@ -219,7 +219,7 @@ export class CompanyService {
         status: '200',
         msg: 'Company list successfully sended',
         data: {
-          companies,
+          companyNameList,
         },
       });
     } catch (error) {
